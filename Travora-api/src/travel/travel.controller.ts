@@ -10,7 +10,7 @@ export class TravelController {
   health() {
     return {
       status: 'ok',
-      service: 'TripMate AI',
+      service: 'Travora Travel API',
     };
   }
 

@@ -7,7 +7,7 @@ export const ItinerarySchema = z.object({
     travelers: z.number(),
     totalDays: z.number(),
     travelDates: z.string(),
-    estimatedBudget: z.number(),
+    estimatedBudget: z.number().nullable(),
     travelStyle: z.string(),
   }),
 
@@ -23,7 +23,6 @@ export const ItinerarySchema = z.object({
     z.object({
       day: z.number(),
       title: z.string(),
-      subtotal: z.number(),
 
       activities: z.array(
         z.object({
@@ -37,23 +36,22 @@ export const ItinerarySchema = z.object({
     }),
   ),
 
-  budgetBreakdown: z.object({
-    flights: z.number(),
-    hotel: z.number(),
-    food: z.number(),
-    transportation: z.number(),
-    activities: z.number(),
-    miscellaneous: z.number(),
-    total: z.number(),
-    remaining: z.number(),
-  }),
+  travelTips: z
+    .array(
+      z.object({
+        tag: z.enum([
+          "WEATHER",
+          "TRANSIT",
+          "BOOKING WINDOW",
+          "MONEY",
+          "CROWDS",
+          "SAFETY",
+        ]),
 
-  travelTips: z.array(
-    z.object({
-      title: z.string(),
-      description: z.string(),
-    }),
-  ),
+        title: z.string(),
 
-  totalEstimatedCost: z.string(),
+        description: z.string(),
+      }),
+    )
+    .length(6),
 });

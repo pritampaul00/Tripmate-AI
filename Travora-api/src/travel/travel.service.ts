@@ -1,13 +1,10 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable } from '@nestjs/common';
 
-import { TravelRequestDto } from "./dto/travel-request.dto";
-
-import { TravelGraph } from "../graph/travel.graph";
-import { createInitialState } from "../graph/create-initial-state";
-
-import { TravelRequestParser } from "../common/travel-request.parser";
-
-import { ResponseAgent } from "../agents/response.agent";
+import { TravelRequestDto } from './dto/travel-request.dto';
+import { TravelGraph } from '../graph/travel.graph';
+import { createInitialState } from '../graph/create-initial-state';
+import { TravelRequestParser } from '../common/travel-request.parser';
+import { ResponseAgent } from '../agents/response.agent';
 
 @Injectable()
 export class TravelService {
@@ -19,6 +16,14 @@ export class TravelService {
 
   async planTrip(request: TravelRequestDto) {
     const parsed = this.parser.parse(request.message);
+
+    if (parsed.missingFields.length > 0) {
+  return {
+    status: 'needs_input',
+    request: parsed,
+    missingFields: parsed.missingFields,
+  };
+}
 
     const state = await this.graph.invoke(
       createInitialState(request.message, parsed),

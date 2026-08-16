@@ -1,16 +1,15 @@
-import { Injectable } from "@nestjs/common";
-import { START, END, StateGraph } from "@langchain/langgraph";
+import { Injectable } from '@nestjs/common';
+import { START, END, StateGraph,} from '@langchain/langgraph';
 
-import {
-  TravelState,
-  TravelStateAnnotation,
-} from "./travel.state";
+import { TravelState, TravelStateAnnotation } from './travel.state';
 
-import { FlightAgent } from "../agents/flight.agent";
-import { HotelAgent } from "../agents/hotel.agent";
-import { RecommendationAgent } from "../agents/recommendation.agent";
-import { ItineraryAgent } from "../agents/itinerary.agent";
-//import { ReportAgent } from "../agents/report.agent";
+import { FlightAgent } from '../agents/flight.agent';
+import { HotelAgent } from '../agents/hotel.agent';
+import { RecommendationAgent } from '../agents/recommendation.agent';
+import { ItineraryAgent } from '../agents/itinerary.agent';
+import { ResponseAgent } from '../agents/response.agent';
+
+import { TripFeasibilityNode } from './nodes/trip-feasibility.node';
 
 @Injectable()
 export class TravelGraph {
@@ -21,60 +20,83 @@ export class TravelGraph {
     private readonly hotelAgent: HotelAgent,
     private readonly recommendationAgent: RecommendationAgent,
     private readonly itineraryAgent: ItineraryAgent,
-    //private readonly reportAgent: ReportAgent,
+    private readonly tripFeasibilityNode: TripFeasibilityNode,
+    private readonly responseAgent: ResponseAgent,
   ) {
-    this.graph = new StateGraph(TravelStateAnnotation)
+    this.graph = new StateGraph(
+      TravelStateAnnotation,
+    )
 
       .addNode(
-        "flightNode",
+        'flightNode',
         (state: TravelState) =>
           this.flightAgent.invoke(state),
       )
 
       .addNode(
-        "hotelNode",
+        'hotelNode',
         (state: TravelState) =>
           this.hotelAgent.invoke(state),
       )
 
       .addNode(
-        "recommendationNode",
+        'recommendationNode',
         (state: TravelState) =>
           this.recommendationAgent.invoke(state),
       )
 
       .addNode(
-        "itineraryNode",
+        'itineraryNode',
         (state: TravelState) =>
           this.itineraryAgent.invoke(state),
       )
 
-      // .addNode(
-      //   "reportNode",
-      //   (state: TravelState) =>
-      //     this.reportAgent.invoke(state),
-      // )
+      .addNode(
+        'tripFeasibilityNode',
+        (state: TravelState) =>
+          this.tripFeasibilityNode.invoke(state),
+      )
 
-      .addEdge(START, "flightNode")
-
-      .addEdge("flightNode", "hotelNode")
-
-      .addEdge(
-        "hotelNode",
-        "recommendationNode",
+      .addNode(
+        'responseNode',
+        (state: TravelState) =>
+          this.responseAgent.invoke(state),
       )
 
       .addEdge(
-        "recommendationNode",
-        "itineraryNode",
+        START,
+        'flightNode',
       )
 
       .addEdge(
-        "itineraryNode",
+        'flightNode',
+        'hotelNode',
+      )
+
+      .addEdge(
+        'hotelNode',
+        'recommendationNode',
+      )
+
+      .addEdge(
+        'recommendationNode',
+        'itineraryNode',
+      )
+
+      .addEdge(
+        'itineraryNode',
+        'tripFeasibilityNode',
+      )
+
+      .addEdge(
+        'tripFeasibilityNode',
+        'responseNode',
+      )
+
+      .addEdge(
+        'responseNode',
         END,
       )
-
-      // .addEdge("reportNode", END)
 
       .compile();
   }

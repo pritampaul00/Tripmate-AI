@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
+
 import { TravelRequestParser } from '../common/travel-request.parser';
 import { TravelState } from '../graph/travel.state';
 
 @Injectable()
 export class RequestParserAgent {
-  constructor(
-    private readonly parser: TravelRequestParser,
-  ) {}
+  constructor(private readonly parser: TravelRequestParser) {}
 
   async invoke(state: TravelState) {
-    return this.parser.parse(state.message);
+    return {
+      tripRequest: this.parser.parse(state.message),
+    };
   }
 }

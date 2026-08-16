@@ -1,38 +1,37 @@
-import { TravelState } from "./travel.state";
-
-interface ParsedTravelRequest {
-  origin?: string;
-  originIata?: string;
-
-  destination?: string;
-
-  days?: number;
-  budget?: number;
-}
+import { TravelState } from './travel.state';
+import { TripRequest } from '../models/trip-request.model';
 
 export function createInitialState(
   message: string,
-  parsed: ParsedTravelRequest,
+  request: TripRequest,
 ): TravelState {
   return {
     message,
 
-    origin: parsed.origin,
-    originIata: parsed.originIata,
+    tripRequest: request,
 
-    destination: parsed.destination,
+    origin: request.origin,
+    originIata: undefined,
+    destination: request.destination,
 
-    days: parsed.days,
-    budget: parsed.budget,
+    startDate: request.dates.startDate,
+    endDate: request.dates.endDate,
+
+    days: request.durationDays,
+    budget: request.budget?.amount ?? null,
+    travelers: request.travelers.total,
+    travelStyle: request.travelStyle,
 
     flights: [],
-
+    flightRanking: undefined,
     hotels: [],
-
+    hotelRanking: undefined,
     recommendation: undefined,
-
     itinerary: undefined,
+    plannedDayCandidates: [],
 
-    // report: undefined,
+    budgetBreakdown: undefined,
+
+    tripFeasibility: undefined,
   };
 }

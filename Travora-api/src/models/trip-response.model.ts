@@ -1,75 +1,125 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { TravelState } from "../graph/travel.state";
+import { BudgetBreakdown } from './itinerary.model';
+import { Flight, } from './flight.model';
+import { Hotel } from './hotel.model';
+import { FlightRanking } from './flight-ranking.model';
+import { HotelRanking } from './hotel-ranking.model';
+import { TripRequest } from './trip-request.model';
+import { DailyPlan } from './itinerary.model';
+import { TripFeasibility } from './trip-feasibility.model';
+import {HotelRecommendationExplanation} from './recommendation.model';
 
-@Injectable()
-export class ResponseAgent {
-  private readonly logger = new Logger(ResponseAgent.name);
+export interface TripDatePlan {
+  startDate?: string;
+  endDate?: string;
+  days: number;
+  nights: number;
+  flexible: boolean;
+  source: 'explicit' | 'derived-from-start' | 'flexible-window' | 'missing';
+  searchWindow?: {
+    startDate: string;
+    endDate: string;
+  };
+  assumptions: string[];
+}
 
-  async invoke(state: TravelState) {
-    this.logger.log("📦 Building final response");
+export interface TripMapStop {
+  id?: string;
+  title: string;
+  location: string;
+  latitude?: number;
+  longitude?: number;
+  time?: string;
+}
 
-    // Debug logs
-    this.logger.debug(
-      "state.itinerary =\n" +
-        JSON.stringify(state.itinerary, null, 2),
-    );
+export interface TripMapDay {
+  day: number;
+  title: string;
+  area?: string;
+  stops: TripMapStop[];
+}
 
-    this.logger.debug(
-      "summary =\n" +
-        JSON.stringify(state.itinerary?.summary, null, 2),
-    );
+export interface TripMap {
+  destination: string;
+  days: TripMapDay[];
+}
 
-    return {
-      success: true,
+export interface TripOptimization {
+  flight: {
+    recommended: Flight | null;
+    cheapest: Flight | null;
+    fastest: Flight | null;
+    fewestStops: Flight | null;
+    lowestEmissions: Flight | null;
+  };
+  hotel: {
+    recommended: Hotel | null;
+    cheapest: Hotel | null;
+    bestRated: Hotel | null;
+    bestLocation: Hotel | null;
+    bestForCouples: Hotel | null;
+    bestForFamilies: Hotel | null;
+  };
+  budgetFit: {
+    requestedBudget: number | null;
+    currency: string;
+    estimatedTotal: number | null;
+    remaining: number | null;
+    status: string;
+  };
+}
 
-      // report: state.report ?? "",
+export interface TripPlan {
+  id: string;
+  status: 'ready' | 'partial';
+  request: TripRequest;
+  dates: TripDatePlan;
+  summary: {
+    destination: string;
+    origin: string;
+    travelers: number;
+    days: number;
+    nights: number;
+    travelStyle?: string;
+    budget?: number;
+    currency: string;
+    summary: string;
+  };
+  recommendedFlight: Flight | null;
+  availableFlights: Flight[];
+  recommendedHotel: Hotel | null;
+  availableHotels: Hotel[];
+  flightAlternatives: Flight[];
+  hotelAlternatives: Hotel[];
+  flightRanking: FlightRanking | null;
+  hotelRanking: HotelRanking | null;
+  budget: BudgetBreakdown | null;
+  hotelExplanation: HotelRecommendationExplanation | null;
+  totalEstimatedCost: string;
+  itinerary: {
+    days: DailyPlan[];
+  };
+  map: TripMap;
+  optimization: TripOptimization;
+  explanations: {
+    flight: string;
+    hotel: string;
+  };
+  // bookingTips: {
+  //   flight: string[];
+  //   hotel: string[];
+  // };
+  travelTips: Array<{
+    tag: string;
+    title: string;
+    description: string;
+  }>;
+  assumptions: string[];
+  warnings: string[];
+  tripFeasibility:
+  TripFeasibility | null;
+}
 
-      trip: {
-        summary: state.itinerary?.summary,
-
-        recommendedFlight:
-          state.recommendation?.recommendedFlight ?? null,
-
-        flightRecommendationReason:
-          state.itinerary?.flightRecommendationReason ?? "",
-
-        flightBookingTips:
-          state.itinerary?.flightBookingTips ?? [],
-
-        recommendedHotel:
-          state.recommendation?.recommendedHotel ?? null,
-
-        hotelRecommendationReason:
-          state.itinerary?.hotelRecommendationReason ?? "",
-
-        hotelBookingTips:
-          state.itinerary?.hotelBookingTips ?? [],
-
-        dailyPlans:
-          state.itinerary?.dailyPlans ?? [],
-
-        budgetBreakdown:
-          state.itinerary?.budgetBreakdown ?? {
-            flights: 0,
-            hotel: 0,
-            food: 0,
-            transportation: 0,
-            activities: 0,
-            miscellaneous: 0,
-            total: 0,
-            remaining: 0,
-          },
-
-        travelTips:
-          state.itinerary?.travelTips ?? [],
-
-        totalEstimatedCost:
-          state.itinerary?.totalEstimatedCost ?? "",
-
-        availableFlights: state.flights,
-
-        availableHotels: state.hotels,
-      },
-    };
-  }
+export interface TripPlanResponse {
+  success: boolean;
+  trip: TripPlan;
 }
