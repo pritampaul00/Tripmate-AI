@@ -1,22 +1,16 @@
-interface Props {
-  children: React.ReactNode;
+"use client";
+
+import { ReactNode } from "react";
+
+interface ReportContentProps {
+  children: ReactNode;
 }
 
 export default function ReportContent({
   children,
-}: Props) {
+}: ReportContentProps) {
   return (
-    <div
-  className="
-    w-[90%]
-    max-w-[1080px]
-    mx-auto
-
-    flex
-    flex-col
-    gap-16
-  "
-    >
+    <div>
       {children}
     </div>
   );
