@@ -10,7 +10,7 @@ async function bootstrap() {
 app.enableCors({
   origin: [
     'http://localhost:3001',
-    'https://tripmate-ai-seven.vercel.app',
+    'https://travora-gamma.vercel.app',
   ],
   credentials: true,
 });
